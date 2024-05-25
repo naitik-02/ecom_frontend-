@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Button, Container, Row, Col, Image, Form } from "react-bootstrap";
+import { Button, Container, Row, Col, Image } from "react-bootstrap";
 import { server } from "../main";
 import { useParams } from "react-router-dom";
 import { CartData } from "../Context/CartContext";
@@ -8,10 +8,10 @@ import { UserData } from "../Context/UserContext";
 import Loader from "../Components/Loader";
 import toast from "react-hot-toast";
 
-
 const ProductDetails = () => {
   const [product, setProduct] = useState([]);
   const [stock, setStock] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const params = useParams();
 
@@ -19,12 +19,14 @@ const ProductDetails = () => {
   const { isAuth, user } = UserData();
 
   async function fetchProduct() {
+    setLoading(true);
     try {
       const { data } = await axios.get(`${server}/api/product/${params.id}`);
-
       setProduct(data.product);
+      setLoading(false);
     } catch (error) {
       console.log(error);
+      setLoading(false);
     }
   }
 
@@ -56,6 +58,11 @@ const ProductDetails = () => {
   const addToCartHandler = async (product) => {
     await addToCart(product);
   };
+
+  if (loading) {
+    return <Loader />;
+  }
+
   return (
     <Container className="mt-4">
       {product && (
@@ -82,7 +89,7 @@ const ProductDetails = () => {
                   Update Stock
                 </Button>
               </>
-            )}{" "}
+            )}
             <br />
             {product.stock === 0 ? (
               <p className="text-danger">Out of Stock</p>
@@ -93,11 +100,11 @@ const ProductDetails = () => {
                     onClick={() => addToCartHandler(product._id)}
                     variant="secondary"
                   >
-                    Add to Card
+                    Add to Cart
                   </Button>
                 ) : (
                   <p className="text-danger">
-                    Please Login to Add this product in your cart
+                    Please Login to Add this product to your cart
                   </p>
                 )}
               </>
